@@ -66,6 +66,8 @@ Before deploying:
 3. Add an Actions secret named `VITE_APPS_SCRIPT_URL`.
 4. Push to `main`.
 
+If the page is blank, confirm GitHub Pages is set to **GitHub Actions**, not **Deploy from a branch**. This is a Vite app, so GitHub Pages must serve the generated `dist` build.
+
 ## Customization
 
 - Update copy and event details in `src/App.jsx`.
