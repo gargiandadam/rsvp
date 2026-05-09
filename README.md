@@ -51,8 +51,8 @@ Timestamp
 Guest Name
 RSVP Status
 Number of Guests
-Custom Question 1
-Custom Question 2
+Additional Guest Name
+Marriage Advice
 ```
 
 ## GitHub Pages

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 const APPS_SCRIPT_URL = import.meta.env.VITE_APPS_SCRIPT_URL || "";
 
@@ -6,7 +6,7 @@ const initialForm = {
   guestName: "",
   rsvpStatus: "Attending",
   guestCount: "1",
-  favoriteMemory: "",
+  additionalGuestName: "",
   marriageAdvice: "",
   website: "",
 };
@@ -19,10 +19,7 @@ function App() {
 
   const isAttending = form.rsvpStatus === "Attending";
 
-  const guestCountOptions = useMemo(
-    () => Array.from({ length: 6 }, (_, index) => String(index + 1)),
-    [],
-  );
+  const hasAdditionalGuest = isAttending && form.guestCount === "2";
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -30,11 +27,12 @@ function App() {
       ...current,
       [name]: value,
       ...(name === "rsvpStatus" && value === "Not attending"
-        ? { guestCount: "0" }
+        ? { guestCount: "0", additionalGuestName: "" }
         : {}),
       ...(name === "rsvpStatus" && value === "Attending" && current.guestCount === "0"
         ? { guestCount: "1" }
         : {}),
+      ...(name === "guestCount" && value === "1" ? { additionalGuestName: "" } : {}),
     }));
     setErrors((current) => ({ ...current, [name]: "" }));
   }
@@ -52,6 +50,10 @@ function App() {
 
     if (isAttending && (!form.guestCount || Number(form.guestCount) < 1)) {
       nextErrors.guestCount = "Please choose the number of guests attending.";
+    }
+
+    if (hasAdditionalGuest && !form.additionalGuestName.trim()) {
+      nextErrors.additionalGuestName = "Please enter your additional guest's full name.";
     }
 
     return nextErrors;
@@ -93,7 +95,9 @@ function App() {
           guestName: form.guestName.trim(),
           rsvpStatus: form.rsvpStatus,
           guestCount: isAttending ? form.guestCount : "0",
-          favoriteMemory: form.favoriteMemory.trim(),
+          additionalGuestName: hasAdditionalGuest
+            ? form.additionalGuestName.trim()
+            : "",
           marriageAdvice: form.marriageAdvice.trim(),
         }),
       });
@@ -110,81 +114,37 @@ function App() {
     }
   }
 
-  function resetForm() {
-    setConfirmation(null);
-    setErrors({});
-  }
-
   return (
     <main className="site-shell">
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero__content">
-          <p className="eyebrow">Civil Ceremony Celebration Party</p>
-          <h1 id="hero-title">Gargi & Adam</h1>
+          <h1 className="hero__names" id="hero-title">Gargi & Adam</h1>
+          <p className="hero__occasion">Civil Ceremony Celebration</p>
           <p className="date">August 22, 2026 at 7:00 PM</p>
           <p className="welcome">
-            With full hearts, Gargi and Adam are beginning this beautiful new
-            chapter together. Your love, blessings, and presence mean so much,
-            and we would be honored to celebrate this intimate day with you.
+            Please join us for some drinks and appetizers. We are so excited to
+            celebrate with you!
           </p>
           <a className="button button--primary" href="#rsvp">
-            RSVP with love
+            RSVP
           </a>
-        </div>
-      </section>
-
-      <section className="details" aria-label="Wedding details">
-        <div>
-          <span className="section-kicker">When</span>
-          <p>Saturday, August 22, 2026 at 7:00 PM</p>
-        </div>
-        <div>
-          <span className="section-kicker">Celebrating</span>
-          <p>A celebration party for their civil ceremony and the beginning of forever</p>
-        </div>
-        <div>
-          <span className="section-kicker">RSVP</span>
-          <p>Please respond when you can so we can plan with care.</p>
         </div>
       </section>
 
       <section className="rsvp-section" id="rsvp" aria-labelledby="rsvp-title">
         <div className="rsvp-intro">
-          <p className="eyebrow">Kindly reply</p>
           <h2 id="rsvp-title">We hope you can join us</h2>
           <p>
-            Share your RSVP below, along with a favorite memory or a few words
-            of advice for the couple to treasure.
+            Share your RSVP below, along with a few words of advice for the
+            couple to treasure.
           </p>
         </div>
 
         <div className="form-panel">
           {confirmation ? (
-            <Confirmation
-              type={confirmation.type}
-              onReset={resetForm}
-            />
+            <Confirmation type={confirmation.type} />
           ) : (
             <form onSubmit={handleSubmit} noValidate>
-              <div className="field">
-                <label htmlFor="guestName">Guest full name *</label>
-                <input
-                  id="guestName"
-                  name="guestName"
-                  type="text"
-                  autoComplete="name"
-                  value={form.guestName}
-                  onChange={updateField}
-                  aria-invalid={Boolean(errors.guestName)}
-                  aria-describedby={errors.guestName ? "guestName-error" : undefined}
-                />
-                {errors.guestName && (
-                  <p className="error" id="guestName-error">
-                    {errors.guestName}
-                  </p>
-                )}
-              </div>
-
               <fieldset className="field">
                 <legend>Will you be attending? *</legend>
                 <div className="segmented-control">
@@ -204,43 +164,71 @@ function App() {
                 {errors.rsvpStatus && <p className="error">{errors.rsvpStatus}</p>}
               </fieldset>
 
+              {isAttending && (
+                <div className="field">
+                  <label htmlFor="guestCount">Number of guests attending *</label>
+                  <select
+                    id="guestCount"
+                    name="guestCount"
+                    value={form.guestCount}
+                    onChange={updateField}
+                    aria-invalid={Boolean(errors.guestCount)}
+                    aria-describedby={errors.guestCount ? "guestCount-error" : undefined}
+                  >
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                  </select>
+                  {errors.guestCount && (
+                    <p className="error" id="guestCount-error">
+                      {errors.guestCount}
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div className="field">
-                <label htmlFor="guestCount">Number of guests attending *</label>
-                <select
-                  id="guestCount"
-                  name="guestCount"
-                  value={form.guestCount}
+                <label htmlFor="guestName">Guest full name *</label>
+                <input
+                  id="guestName"
+                  name="guestName"
+                  type="text"
+                  autoComplete="name"
+                  value={form.guestName}
                   onChange={updateField}
-                  disabled={!isAttending}
-                  aria-invalid={Boolean(errors.guestCount)}
-                  aria-describedby={errors.guestCount ? "guestCount-error" : undefined}
-                >
-                  {!isAttending && <option value="0">0</option>}
-                  {guestCountOptions.map((count) => (
-                    <option key={count} value={count}>
-                      {count}
-                    </option>
-                  ))}
-                </select>
-                {errors.guestCount && (
-                  <p className="error" id="guestCount-error">
-                    {errors.guestCount}
+                  aria-invalid={Boolean(errors.guestName)}
+                  aria-describedby={errors.guestName ? "guestName-error" : undefined}
+                />
+                {errors.guestName && (
+                  <p className="error" id="guestName-error">
+                    {errors.guestName}
                   </p>
                 )}
               </div>
 
-              <div className="field">
-                <label htmlFor="favoriteMemory">
-                  What is your favorite memory of the couple?
-                </label>
-                <textarea
-                  id="favoriteMemory"
-                  name="favoriteMemory"
-                  rows="4"
-                  value={form.favoriteMemory}
-                  onChange={updateField}
-                />
-              </div>
+              {hasAdditionalGuest && (
+                <div className="field">
+                  <label htmlFor="additionalGuestName">Additional guest name *</label>
+                  <input
+                    id="additionalGuestName"
+                    name="additionalGuestName"
+                    type="text"
+                    autoComplete="name"
+                    value={form.additionalGuestName}
+                    onChange={updateField}
+                    aria-invalid={Boolean(errors.additionalGuestName)}
+                    aria-describedby={
+                      errors.additionalGuestName
+                        ? "additionalGuestName-error"
+                        : undefined
+                    }
+                  />
+                  {errors.additionalGuestName && (
+                    <p className="error" id="additionalGuestName-error">
+                      {errors.additionalGuestName}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div className="field">
                 <label htmlFor="marriageAdvice">
@@ -270,7 +258,11 @@ function App() {
 
               {errors.submit && <p className="error error--submit">{errors.submit}</p>}
 
-              <button className="button button--primary button--full" type="submit" disabled={status === "submitting"}>
+              <button
+                className="button button--primary button--full"
+                type="submit"
+                disabled={status === "submitting"}
+              >
                 {status === "submitting" ? "Sending RSVP..." : "Send RSVP"}
               </button>
             </form>
@@ -281,21 +273,37 @@ function App() {
   );
 }
 
-function Confirmation({ type, onReset }) {
+function Confirmation({ type }) {
   const attending = type === "Attending";
 
   return (
     <div className="confirmation" role="status" aria-live="polite">
       <p className="confirmation__mark">Thank you</p>
-      <h2>{attending ? "We cannot wait to celebrate with you." : "Your reply means so much."}</h2>
+      <h2>
+        {attending
+          ? "We cannot wait to celebrate with you!"
+          : "Thank you for letting us know."}
+      </h2>
       <p>
         {attending
-          ? "Your RSVP has been received. Gargi and Adam are so grateful to have your love surrounding them on this special day."
-          : "Thank you for letting us know. You will be missed, and Gargi and Adam are grateful for your love and blessings from afar."}
+          ? "We are so grateful that you're able to join us!"
+          : "You will be missed. We are grateful for your love and blessings from afar"}
       </p>
-      <button className="button button--secondary" type="button" onClick={onReset}>
-        Submit another response
-      </button>
+      {attending && (
+        <div className="faq" aria-label="Frequently asked questions">
+          <h3>FAQs</h3>
+          <div className="faq__item">
+            <h4>Is there parking?</h4>
+            <p>
+              Yes, there is parking available in the building through the West
+              side entrance - drive past the main lobby and approach the
+              undergound parking. Key in 1234, give your name, and security
+              will let you in. Other parking is also available outside, on the
+              East side (Lakeshore Rd entrance) of Birchwood Park.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

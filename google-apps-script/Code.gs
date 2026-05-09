@@ -1,4 +1,12 @@
 const SHEET_NAME = "RSVP Responses";
+const HEADERS = [
+  "Timestamp",
+  "Guest Name",
+  "RSVP Status",
+  "Number of Guests",
+  "Additional Guest Name",
+  "Marriage Advice",
+];
 
 function doPost(e) {
   try {
@@ -10,7 +18,7 @@ function doPost(e) {
       sanitize_(data.guestName),
       sanitize_(data.rsvpStatus),
       sanitize_(data.guestCount),
-      sanitize_(data.favoriteMemory),
+      sanitize_(data.additionalGuestName),
       sanitize_(data.marriageAdvice),
     ]);
 
@@ -42,14 +50,9 @@ function getOrCreateSheet_() {
   }
 
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow([
-      "Timestamp",
-      "Guest Name",
-      "RSVP Status",
-      "Number of Guests",
-      "Custom Question 1",
-      "Custom Question 2",
-    ]);
+    sheet.appendRow(HEADERS);
+  } else {
+    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
   }
 
   return sheet;
