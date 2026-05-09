@@ -213,7 +213,7 @@ function App() {
 
               {hasAdditionalGuest && (
                 <div className="field">
-                  <label htmlFor="additionalGuestName">Additional guest name *</label>
+                  <label htmlFor="additionalGuestName">Additional guest name: *</label>
                   <input
                     id="additionalGuestName"
                     name="additionalGuestName"
