@@ -40,12 +40,16 @@ function App() {
   function validateForm() {
     const nextErrors = {};
 
-    if (!form.guestName.trim()) {
-      nextErrors.guestName = "Please enter your full name.";
-    }
-
     if (!form.rsvpStatus) {
       nextErrors.rsvpStatus = "Please choose your RSVP status.";
+    }
+
+    if (!isAttending) {
+      return nextErrors;
+    }
+
+    if (!form.guestName.trim()) {
+      nextErrors.guestName = "Please enter your full name.";
     }
 
     if (isAttending && (!form.guestCount || Number(form.guestCount) < 1)) {
@@ -92,7 +96,7 @@ function App() {
           "Content-Type": "text/plain;charset=utf-8",
         },
         body: JSON.stringify({
-          guestName: form.guestName.trim(),
+          guestName: isAttending ? form.guestName.trim() : "",
           rsvpStatus: form.rsvpStatus,
           guestCount: isAttending ? form.guestCount : "0",
           additionalGuestName: hasAdditionalGuest
@@ -166,7 +170,7 @@ function App() {
 
               {isAttending && (
                 <div className="field">
-                  <label htmlFor="guestCount">Number of guests attending *</label>
+                  <label htmlFor="guestCount">Number of guests attending: *</label>
                   <select
                     id="guestCount"
                     name="guestCount"
@@ -186,24 +190,26 @@ function App() {
                 </div>
               )}
 
-              <div className="field">
-                <label htmlFor="guestName">Guest full name *</label>
-                <input
-                  id="guestName"
-                  name="guestName"
-                  type="text"
-                  autoComplete="name"
-                  value={form.guestName}
-                  onChange={updateField}
-                  aria-invalid={Boolean(errors.guestName)}
-                  aria-describedby={errors.guestName ? "guestName-error" : undefined}
-                />
-                {errors.guestName && (
-                  <p className="error" id="guestName-error">
-                    {errors.guestName}
-                  </p>
-                )}
-              </div>
+              {isAttending && (
+                <div className="field">
+                  <label htmlFor="guestName">Guest full name: *</label>
+                  <input
+                    id="guestName"
+                    name="guestName"
+                    type="text"
+                    autoComplete="name"
+                    value={form.guestName}
+                    onChange={updateField}
+                    aria-invalid={Boolean(errors.guestName)}
+                    aria-describedby={errors.guestName ? "guestName-error" : undefined}
+                  />
+                  {errors.guestName && (
+                    <p className="error" id="guestName-error">
+                      {errors.guestName}
+                    </p>
+                  )}
+                </div>
+              )}
 
               {hasAdditionalGuest && (
                 <div className="field">
@@ -287,7 +293,7 @@ function Confirmation({ type }) {
       <p>
         {attending
           ? "We are so grateful that you're able to join us!"
-          : "You will be missed. We are grateful for your love and blessings from afar"}
+          : "You will be missed. We are grateful for your love and blessings from afar."}
       </p>
       {attending && (
         <div className="faq" aria-label="Frequently asked questions">
