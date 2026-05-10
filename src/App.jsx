@@ -44,12 +44,12 @@ function App() {
       nextErrors.rsvpStatus = "Please choose your RSVP status.";
     }
 
-    if (!isAttending) {
-      return nextErrors;
-    }
-
     if (!form.guestName.trim()) {
       nextErrors.guestName = "Please enter your full name.";
+    }
+
+    if (!isAttending) {
+      return nextErrors;
     }
 
     if (isAttending && (!form.guestCount || Number(form.guestCount) < 1)) {
@@ -96,7 +96,7 @@ function App() {
           "Content-Type": "text/plain;charset=utf-8",
         },
         body: JSON.stringify({
-          guestName: isAttending ? form.guestName.trim() : "",
+          guestName: form.guestName.trim(),
           rsvpStatus: form.rsvpStatus,
           guestCount: isAttending ? form.guestCount : "0",
           additionalGuestName: hasAdditionalGuest
@@ -190,26 +190,24 @@ function App() {
                 </div>
               )}
 
-              {isAttending && (
-                <div className="field">
-                  <label htmlFor="guestName">Guest full name: *</label>
-                  <input
-                    id="guestName"
-                    name="guestName"
-                    type="text"
-                    autoComplete="name"
-                    value={form.guestName}
-                    onChange={updateField}
-                    aria-invalid={Boolean(errors.guestName)}
-                    aria-describedby={errors.guestName ? "guestName-error" : undefined}
-                  />
-                  {errors.guestName && (
-                    <p className="error" id="guestName-error">
-                      {errors.guestName}
-                    </p>
-                  )}
-                </div>
-              )}
+              <div className="field">
+                <label htmlFor="guestName">Guest full name: *</label>
+                <input
+                  id="guestName"
+                  name="guestName"
+                  type="text"
+                  autoComplete="name"
+                  value={form.guestName}
+                  onChange={updateField}
+                  aria-invalid={Boolean(errors.guestName)}
+                  aria-describedby={errors.guestName ? "guestName-error" : undefined}
+                />
+                {errors.guestName && (
+                  <p className="error" id="guestName-error">
+                    {errors.guestName}
+                  </p>
+                )}
+              </div>
 
               {hasAdditionalGuest && (
                 <div className="field">
